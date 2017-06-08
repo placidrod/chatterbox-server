@@ -11,8 +11,10 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var qs = require('querystring');
 
-var requestHandler = function(request, response) {
+module.exports = function(request, response) {
+  var data = {results: []};
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -43,7 +45,7 @@ var requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,7 +54,49 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  if(request.method === 'GET'  && request.url === '/classes/messages') {
+    statusCode = 200;
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(data));
+  } else if(request.method === 'POST' && request.url === '/classes/messages') {
+    statusCode = 201;
+    var requestBody = '';
+    request.on('error', function(err) {
+      console.log(err);
+    });
+    request.on('data', function(data){
+      requestBody += data;
+    });
+    request.on('end', function() {
+      console.log('requestBody', requestBody);
+      console.log('typeof requestBody', typeof requestBody);
+      var formData = JSON.parse(requestBody);
+      console.log('formData', formData);
+      formData.objectId = Date.now();
+      var dateTime = new Date();
+      var formatted = dateTime.toISOString();
+      formData.createdAt = formatted;
+      formData.updatedAt = formatted;
+
+      if (formData.hasOwnProperty('roomName') === false) {
+        formData.roomName = 'lobby';
+      }
+      console.log('formData after', formData);
+      data.results.push(formData);
+      // console.log(data.results);
+      response.writeHead(statusCode, headers);
+      // data.results.push()
+      // response.statusCode = 201;
+      // createdAt, objectId, roomname, text, updatedAt, username
+      console.log('data', data);
+      response.end(JSON.stringify(data));
+    });
+  } else {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.end();
+  }
+  // response.end('Hello, World!');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -71,3 +115,11 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+/*
+createdAt : "2017-06-08T03:28:30.446Z"
+objectId: "DgkjjzK2Dj"
+roomname : "lobby"
+text : "hello"
+updatedAt : "2017-06-08T03:28:30.446Z"
+username: "ghj"
+*/
