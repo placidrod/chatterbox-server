@@ -19,7 +19,7 @@ exports.collectData = function(request, callback) {
 exports.sendResponse = function(response, data, statusCode) {
   statusCode = statusCode || 200;
   response.writeHead(statusCode, defaultCorsHeaders);
-  console.log('data: ', data);
+  //console.log('data: ', data);
   response.end(JSON.stringify(data));
 };
 
