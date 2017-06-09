@@ -23,5 +23,16 @@ exports.sendResponse = function(response, data, statusCode) {
   response.end(JSON.stringify(data));
 };
 
+exports.makeActionHandler = function(actionMap) {
+  return function(request, response) {
+    var action = actionMap[request.method];
+    if (action) {
+      action(request, response);
+    } else {
+      sendResponse(response, 'Not Found', 404);
+    }
+  };
+};
+
 // exports.collectData;
 // exports.sendResponse;

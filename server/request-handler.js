@@ -27,18 +27,7 @@ var actions = {
   }
 };
 
-var makeActionHandler = function(actionMap) {
-  return function(request, response) {
-    var action = actionMap[request.method];
-    if (action) {
-      action(request, response);
-    } else {
-      utils.sendResponse(response, 'Not Found', 404);
-    }
-  };
-};
-
-exports.requestHandler = makeActionHandler(actions);
+exports.requestHandler = utils.makeActionHandler(actions);
 
 /*
 createdAt : "2017-06-08T03:28:30.446Z"
